@@ -8,3 +8,9 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/"
+  to = "/stats"
+  status = 301
+  force = true
