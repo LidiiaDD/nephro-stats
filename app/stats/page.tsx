@@ -6,10 +6,6 @@ import dynamic from "next/dynamic";
 import DescribeTable from "./components/DescribeTable";
 import CorrelationHeatmap from "./components/CorrelationHeatmap";
 
-// ...
-<DataTab onDataChange={(rows)=>{/* якщо треба – прокинути дані в інші блоки */}} />
-
-
 // Plotly лише на клієнті
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
