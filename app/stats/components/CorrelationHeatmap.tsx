@@ -3,6 +3,7 @@
 
 import React from 'react';
 import dynamic from 'next/dynamic';
+import type { PlotParams } from 'react-plotly.js';
 import {
   CorrMethod,
   correlation,
@@ -11,7 +12,8 @@ import {
   fmt,
 } from './stats-utils';
 
-const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
+// ВАЖЛИВО: типізуємо динамічний імпорт Plotly
+const Plot = dynamic<PlotParams>(() => import('react-plotly.js'), { ssr: false });
 
 type Props = {
   data: any[];                 // масив рядків таблиці
@@ -30,8 +32,7 @@ export default function CorrelationHeatmap({
   const [alpha, setAlpha] = React.useState(0.05);
 
   const cols =
-    numericCols ??
-    inferNumericColumns(data).slice(0, 40); // безпека: не більше 40 для відмалювання
+    numericCols ?? inferNumericColumns(data).slice(0, 40); // безпека: не більше 40 для відмалювання
 
   const { Z, R, P, Q } = React.useMemo(() => {
     const m = cols.length;
@@ -58,8 +59,8 @@ export default function CorrelationHeatmap({
           Z[i][j] = R[i][j];
         } else {
           const { r, p } = correlation(
-            data.map((r) => r[cols[i]]),
-            data.map((r) => r[cols[j]]),
+            data.map((row) => row[cols[i]]),
+            data.map((row) => row[cols[j]]),
             method
           );
           R[i][j] = r;
@@ -91,9 +92,7 @@ export default function CorrelationHeatmap({
 
   // Анотації в клітинках
   const annotations =
-    showNums
-      ? buildAnnotations(cols, R, P, Q, useFDR, alpha)
-      : [];
+    showNums ? buildAnnotations(cols, R, P, Q, useFDR, alpha) : [];
 
   return (
     <div className="mt-6">
@@ -164,8 +163,9 @@ export default function CorrelationHeatmap({
               '<b>%{x}</b> vs <b>%{y}</b><br>r=%{z:.3f}<br>p=%{customdata[0]:.3g}' +
               (useFDR ? '<br>q(FDR)=%{customdata[1]:.3g}' : '') +
               '<extra></extra>',
+            // customdata: матриця [ [p, q], … ]
             customdata: zip2d(P, Q),
-          } as any,
+          } as any, // спрощуємо типізацію трейсу
         ]}
         layout={{
           height: Math.min(120 + cols.length * 28, 900),
@@ -185,9 +185,8 @@ function inferNumericColumns(rows: any[]): string[] {
   const cols = Object.keys(rows[0] ?? {});
   const ok: string[] = [];
   for (const c of cols) {
-    // numeric if ≥ 70% значень парсяться як числа
-    let good = 0,
-      seen = 0;
+    // numeric якщо ≥70% значень парсяться як числа
+    let good = 0, seen = 0;
     for (const r of rows) {
       const v = toNum(r[c]);
       if (v !== null) {
