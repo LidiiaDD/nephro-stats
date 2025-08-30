@@ -1,5 +1,6 @@
 "use client";
 
+import PlotClient from './components/PlotClient';
 import DataTab from './DataTab';
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
@@ -7,7 +8,7 @@ import DescribeTable from "./components/DescribeTable";
 import CorrelationHeatmap from "./components/CorrelationHeatmap";
 
 // Plotly лише на клієнті
-const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+const Plot = dynamic(() => import("react-plotly.js"), { ssr: false }) as unknown as React.ComponentType<any>;
 
 type Row = { x1: number; x2: number; y: number; time?: number; status?: number };
 
@@ -535,11 +536,11 @@ export default function StatsPage() {
               Еліпси коварації (≈95%)
             </label>
           </div>
-          <Plot
-            data={ldaScatter as any}
-            layout={{
-              height: 540,
-              margin: { l: 50, r: 10, t: 10, b: 45 },
+          <PlotClient
+             data={ldaScatter}
+             layout={{
+                height: 540,
+                margin: { l: 50, r: 10, t: 10, b: 45 },
               xaxis: { title: "x1" },
               yaxis: { title: "x2" },
               legend: { orientation: "h" },
