@@ -1,18 +1,26 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  // якщо використовуєш /app:
+  experimental: { appDir: true },
+
+  // невеликі фоли для браузерного оточення
   webpack: (config) => {
+    if (!config.resolve) config.resolve = {};
     config.resolve.fallback = {
-      ...config.resolve.fallback,
-      buffer: require.resolve('buffer/'),
-      stream: require.resolve('stream-browserify'),
-      util: require.resolve('util'),
+      fs: false,
+      path: false,
+      crypto: false,
+      stream: false,
+      util: false,
     };
     return config;
   },
+
+  // опціонально: компактніший деплой
+  output: 'standalone',
 };
 
-export default nextConfig;
+module.exports = nextConfig;
+
 
